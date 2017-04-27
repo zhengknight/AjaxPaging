@@ -1,0 +1,88 @@
+﻿/*分页css1*/
+#pager {
+    text-align: center;
+}
+
+.dataPager {
+    display: inline-block;
+    height: 28px;
+    line-height: 28px;
+    margin: 20px auto;
+}
+
+    .dataPager a {
+        border: 1px solid #999;
+        cursor: pointer;
+        margin: 0 5px;
+        padding: 2px 7px;
+        color: #FC6602;
+    }
+
+        .dataPager a.yemaa {
+            background-color: #FDECA0;
+            color: #FC6602;
+            cursor: default;
+        }
+
+    .dataPager select {
+        *height: 24px;
+        vertical-align: middle;
+    }
+
+#lblCurrentPage {
+    color: #FC6602;
+}
+
+a.btn {
+    *height: auto;
+}
+
+.box {
+    padding: 10px;
+    border: 1px solid #cdcdcf;
+    clear: both;
+}
+/*列表css1**/
+.column {
+    padding-top: 10px;
+    margin-bottom: 10px;
+    position: relative;
+    *zoom: 1;
+}
+
+.table table {
+    width: 99%;
+    font: 12px/2 '宋体','微软雅黑',Helvetica,Arial,sans-serif;
+}
+
+.table th, .table td {
+    padding: 1px 4px;
+}
+
+.table td {
+    -moz-word-break: break-all;
+    -o-word-break: break-all;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+.table table th,
+.table table td {
+    text-align: center;
+    border-bottom: 1px solid #cecece;
+    background-color: #ececec;
+}
+
+.table table th {
+    background-color: #cbcbcb;
+}
+
+.table table td {
+    background-color: #fff;
+}
+
+.table table {
+    border: solid #cbcbcb 1px;
+    border-collapse: collapse;
+    border-spacing: 0;
+}

@@ -1,0 +1,35 @@
+﻿/*
+#################################################################
+global
+#################################################################
+*/
+html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,n,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{ margin:0; padding:0; border:0; font-size:100%; vertical-align:baseline;font-family:inherit;}
+section,article,aside,header,footer,nav,dialog,figure{display:block;}
+figure{margin:0;}
+ul,ol { list-style: none;}
+a { text-decoration: none;color:#000;outline:0 none; }
+a:hover {text-decoration: underline;}
+i{font-style:normal;}
+abbr[title],
+acronym[title] { border-bottom: 1px dotted; cursor: help;}
+fieldset,img { border: none; }
+body,button,input,select,textarea { font: 12px/1 '微软雅黑','宋体',Helvetica,Arial,sans-serif;}
+button,input,select,textarea { font-size: 100%; margin:0; padding:0;outline: none; }
+table { border-collapse: collapse; border-spacing: 0; width:100%; line-height:2; }
+table a { color:#255fb1; white-space: nowrap;}
+hr { border: none; height:1px; background-color:#e9e9e9;}
+textarea ,input{ resize: none;outline: none;}
+textarea{ resize: none;-webkit-appearance: none;line-height:1.8;}
+b{ font-weight:normal;}
+del{font-family:Arial;}
+img{display:block; overflow:hidden;  }
+select{padding: 2px 3px;height: 28px;background-color: #FFFFFF; border: 1px solid #DDDDDD;color: #666666;outline: medium none;width: 134px;}
+body{background-color:#FFFFFF; width:100%; min-width:980px; }
+/*分页*/
+.dataPager{display:inline-block;height: 28px;line-height: 28px;margin:20px auto;}
+.dataPager a{border: 1px solid #999;cursor:pointer;margin: 0 5px;padding: 2px 7px;color:#FC6602;}
+.dataPager a.yemaa{background-color: #FDECA0;color:#FC6602;}
+.dataPager select{*height:24px;vertical-align:middle;}
+#lblCurrentPage{color:#FC6602;}
+a.btn{*height:auto;}
+.box{ padding:10px; border:1px solid #cdcdcf; clear:both;}

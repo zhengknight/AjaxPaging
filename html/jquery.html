@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>jquery ajax 分页</title>
+    <link href="../css/style.css" rel="stylesheet" />
+    <script src="../js/jquery-1.7.2.min.js"></script>
+    <script src="../js/jquerytemplate.js"></script>
+    <!--jquery template-->
+    <script type="text/x-jquery-tmpl" id="temp">
+        <tr>
+            <td>${Id}</td>
+            <td>${Name}</td>
+            <td>${Age}</td>
+            <td>${Address}</td>
+            <td>${Mobile}</td>
+            <td>${Height}</td>
+            <td>${Weight}</td>
+            <td>${Remark}</td>
+            <td>
+                <a href='javascript:operation(${Id});'>操作</a>
+            </td>
+    </tr>
+</script>
+</head>
+<body>
+    <div id="content" class="table column">
+        <table>
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>名字</th>
+                    <th>年龄</th>
+                    <th>地址</th>
+                    <th>手机</th>
+                    <th>身高</th>
+                    <th>体重</th>
+                    <th>备注</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div id="pager"></div>
+</body>
+</html>
+<script>
+    function sendPostRequest(targetUrl, parameters, successCallback, errorCallback) {
+        $.ajax({
+            type: "POST",
+            url: targetUrl,
+            data: parameters,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: successCallback,
+            timeout: 30000,
+            error: function (e) {
+                if (e.responseText === "") return;
+                if (e.status === 300) {
+                    if (JSON.parse(e.responseText) === "RequireLogon") {
+                        return;
+                    } else if (JSON.parse(e.responseText) === "Unauthorized") {
+                        return;
+                    }
+                } else if (e.status === 401 && e.statusText === "Unauthorized") {
+                    return;
+                }
+                if (e.statusText === "timeout") {
+                    alert("服务器忙");
+                    errorCallback && errorCallback(e);
+                } else if (e) {
+                    errorCallback && errorCallback(e);
+                }
+            }
+        });
+    }
+    /*
+   jauery js分页函数
+   container：分页容器jquery对象
+   pageIndex：当前页码
+   pageSize：页大小
+   dataCount：总页数
+   pageChangedCallback：页面单击回调函数
+   */
+    function drawPagination(container, pageIndex, pageSize, dataCount, pageChangedCallback) {
+        if (dataCount > 0) {
+            var pageCount = parseInt((dataCount + pageSize - 1) / pageSize);
+            var contents = new Array();
+            contents.push('<div class="dataPager clearfix">');
+            if (pageIndex > 1) {
+                contents.push('<a id="pager_lbnFirst" value=1>首页</a>');
+                contents.push('<a id="pager_lbnPrev" value=' + (pageIndex - 1) + '>&lt; 上一页</a>');
+            }
+            contents.join('<span id="pPages">');
+            for (var i = pageIndex - 4; i <= pageIndex + 4; i++) {
+                if (i === pageIndex) {
+                    contents.push('<a id="pager_lbPage' + i + '" disabled="disabled" class="yemaa" style="margin-left:5px;margin-right:5px;text-decoration:none;">' + i + '</a>');
+                } else if (i > 0 && i <= pageCount) {
+                    contents.push('<a id="pager_lbPage' + i + '" value=' + i + ' style="margin-left:5px;margin-right:5px;">' + i + '</a>');
+                }
+            }
+            contents.join('</span>');
+            if (pageIndex < pageCount) {
+                contents.push('<a id="pager_lbnNext" value=' + (pageIndex + 1) + '>下一页 &gt;</a>');
+                contents.push('<a id="pager_lbnLast" value=' + pageCount + '>末页</a>');
+            }
+            contents.push('共 <span id="pager_lblTotalCount">' + dataCount);
+            contents.push('</span> 条 每页 <span id="pager_lblPageSize">' + pageSize);
+            contents.push('</span> 条 第 <span id="lblCurrentPage">' + pageIndex + '</span> / <span id="pager_lblTotalPage">' + pageCount + '</span> 页</div>');
+            container.html(contents.join(''));
+            if (pageChangedCallback) {
+                $("a", container).click(function () {
+                    var self = $(this);
+                    if (!self.attr("disabled")) {
+                        pageChangedCallback(self.attr("value"));
+                    }
+                });
+            }
+            container.show();
+        } else {
+            container.html('');
+            container.hide();
+        }
+    }
+
+    function getQueryOrdersPagination(pageIndex, pageSize) {
+        return { "PageSize": pageSize, "PageIndex": pageIndex, "GetRowCount": true };
+    }
+
+    function bindData(data) {
+        $("#content table tbody").html($("#temp").tmpl(data.Data));
+        drawPagination($("#pager"), data.Pagination.PageIndex, data.Pagination.PageSize, data.Pagination.RowCount, queryOrders);
+    }
+
+    function queryOrders(pageIndex, pageSize) {
+        if (!pageIndex) pageIndex = 1;
+        pageSize = pageSize || 10;
+        var pagination = getQueryOrdersPagination(pageIndex, pageSize);
+        var parameters = JSON.stringify({ "pagination": pagination });
+        sendPostRequest("/ajax/PagingHandler.ashx/Paging", parameters, function (data) {
+            bindData(data);
+        }, function (e) {
+            if (e.statusText === "timeout") {
+                alert("服务器忙");
+            } else {
+                alert(e.responseText);
+            }
+        });
+        return false;
+    }
+
+    window.onload = function () {
+        queryOrders(1, 10);
+    };
+</script>

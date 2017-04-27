@@ -1,0 +1,210 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>纯js分页</title>
+    <link href="../css/style.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="content" class="table column">
+    </div>
+    <div id="pager"></div>
+</body>
+</html>
+<script>
+
+    /*创建XMLHttpRequest*/
+    function createXMLHttpRequest() {
+        var xmlHttp;
+        try {
+            xmlHttp = new XMLHttpRequest();
+        } catch (e) {
+            try {
+                xmlHttp = new ActiveXObject("MSXML2.xmlHttp");
+            } catch (e) {
+                var versions = ['Microsoft.XMLHTTP', 'MSXML.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.7.0', 'Msxml2.XMLHTTP.6.0', 'Msxml2.XMLHTTP.5.0', 'Msxml2.XMLHTTP.4.0', 'MSXML2.XMLHTTP.3.0', 'MSXML2.XMLHTTP'];
+                for (var i = 0; i < versions.length; i++) {
+                    try {
+                        xmlHttp = new ActiveXObject(versions[i]);
+                        break;
+                    } catch (e) {
+                        alert("你的浏览器不支持xmlHttp对象，请升级到IE6以上版本！");
+                        xmlHttp = false;
+                    }
+                }
+            }
+        }
+        var me = this;
+        this.Method = "POST";
+        this.Url = "";
+        this.Async = true;
+        this.Timeout = 10 * 1000;
+        this.Arg = "";
+        this.ContentType = "application/x-www-form-urlencoded";
+        this.Accept = "";
+        this.CallBack = function () { };
+        this.Loading = function () { };
+        this.Error = function () { };
+
+        var timeout = false;//是否超时
+        var timer = setTimeout(function () {
+            timeout = true;
+            xmlHttp.abort();//请求中止
+            me.Error("请求超时");
+        }, this.Timeout);
+
+        this.Send = function () {
+            try {
+                if (this.Url === "") {
+                    return false;
+                }
+                if (!xmlHttp) {
+                }
+                xmlHttp.open(this.Method, this.Url, this.Async);
+                if (this.Method === "POST") {
+                    xmlHttp.setRequestHeader("Content-Type", me.ContentType);
+                    if (this.Accept !== "") {
+                        xmlHttp.setRequestHeader("Accept", me.Accept);
+                    }
+                }
+                xmlHttp.onreadystatechange = function () {
+                    if (xmlHttp.readyState === 4) {
+                        var result = false;
+
+                        // 忽略中止请求
+                        if (timeout) {
+                             return;
+                        }
+                        // 取消等待的超时
+                        clearTimeout(timer);
+
+                        if (xmlHttp.status === 200) {
+                            result = xmlHttp.responseText;
+                        }
+                        xmlHttp = null;
+
+                        me.CallBack(result);
+                    }
+                    else {
+                        me.Loading();
+                    }
+                }
+                if (this.Method === "POST") {
+                    xmlHttp.send(this.Arg);
+                }
+                else {
+                    xmlHttp.send(null);
+                }
+            } catch (ex) {
+                me.Error(ex);
+            }
+            return false;
+        }
+    }
+
+    /*创建发送请求*/
+    function sendPostRequest(targetUrl, parameters, successCallback, errorCallback) {
+        var ajax = new createXMLHttpRequest();
+        ajax.Method = "POST";
+        ajax.ContentType = "application/json; charset=utf-8;";
+        ajax.Accept = "application/json, text/javascript, */*; q=0.01";
+        ajax.Url = targetUrl;
+        ajax.Async = true;
+        ajax.Timeout = 5 * 1000;
+        ajax.Arg = parameters;
+        ajax.CallBack = successCallback;
+        ajax.Error = errorCallback;
+        ajax.Send();
+    }
+
+    /*渲染分页控件*/
+    function drawPagination(container, pageIndex, pageSize, dataCount) {
+        if (dataCount > 0) {
+            var pageCount = parseInt((dataCount + pageSize - 1) / pageSize);
+            var contents = new Array();
+            contents.push('<div class="dataPager clearfix">');
+            if (pageIndex > 1) {
+                contents.push('<a id="pager_lbnFirst" value="1" onclick="queryOrders(1)">首页</a>');
+                contents.push('<a id="pager_lbnPrev" value=' + (pageIndex - 1) + ' onclick="queryOrders(' + (pageIndex - 1) + ')">&lt; 上一页</a>');
+            }
+            contents.join('<span id="pPages">');
+            for (var i = pageIndex - 4; i <= pageIndex + 4; i++) {
+                if (i === pageIndex) {
+                    contents.push('<a id="pager_lbPage' + i + '" disabled="disabled" class="yemaa" style="margin-left:5px;margin-right:5px;text-decoration:none;">' + i + '</a>');
+                } else if (i > 0 && i <= pageCount) {
+                    contents.push('<a id="pager_lbPage' + i + '" value=' + i + ' onclick="queryOrders(' + (i) + ')" style="margin-left:5px;margin-right:5px;">' + i + '</a>');
+                }
+            }
+            contents.join('</span>');
+            if (pageIndex < pageCount) {
+                contents.push('<a id="pager_lbnNext" value=' + (pageIndex + 1) + ' onclick="queryOrders(' + (pageIndex + 1) + ')">下一页 &gt;</a>');
+                contents.push('<a id="pager_lbnLast" value=' + pageCount + '  onclick="queryOrders(' + pageCount + ')" >末页</a>');
+            }
+            contents.push('共 <span id="pager_lblTotalCount">' + dataCount);
+            contents.push('</span> 条 每页 <span id="pager_lblPageSize">' + pageSize);
+            contents.push('</span> 条 第 <span id="lblCurrentPage">' + pageIndex + '</span> / <span id="pager_lblTotalPage">' + pageCount + '</span> 页</div>');
+            container.innerHTML = contents.join('');
+            container.style.display = "block";
+        } else {
+            container.innerHTML = "";
+            container.style.display = "none";
+        }
+    }
+
+    /*构建分页参数*/
+    function getQueryOrdersPagination(pageIndex, pageSize) {
+        return { "PageSize": pageSize, "PageIndex": pageIndex, "GetRowCount": true };
+    }
+
+    /*绑定页面数据*/
+    function bindData(data) {
+        var html = new Array();
+        var json = eval("(" + data + ")");
+        var d = json.Data;
+        html.push("<table>");
+        html.push("<tr><th>Id</th><th>名字</th><th>年龄</th><th>地址</th><th>手机</th><th>身高</th><th>体重</th><th>备注</th><th>操作</th></tr>");
+        for (var i = 0; i < d.length; i++) {
+            html.push(" <tr>");
+            html.push("<td>" + d[i].Id + "</td>");
+            html.push("<td>" + d[i].Name + "</td>");
+            html.push("<td>" + d[i].Age + "</td>");
+            html.push("<td>" + d[i].Address + "</td>");
+            html.push("<td>" + d[i].Mobile + "</td>");
+            html.push("<td>" + d[i].Height + "</td>");
+            html.push("<td>" + d[i].Weight + "</td>");
+            html.push("<td>" + d[i].Remark + "</td>");
+            html.push("<td><a href='javascript:operation(${Id});'>操作</a></td>");
+            html.push(" </tr>");
+        }
+        html.push("</table>");
+        document.getElementById("content").innerHTML = html.join("");
+        drawPagination(document.getElementById("pager"), json.Pagination.PageIndex, json.Pagination.PageSize, json.Pagination.RowCount);
+    }
+
+    /*执行查询*/
+    function queryOrders(pageIndex, pageSize) {
+        if (!pageIndex) pageIndex = 1;
+        pageSize = pageSize || 10;
+        var pagination = getQueryOrdersPagination(pageIndex, pageSize);
+        var parameters = JSON.stringify({ "pagination": pagination });
+        sendPostRequest("/ajax/PagingHandler.ashx/Paging", parameters, function (data) {
+            bindData(data);
+        }, function (e) {
+            if (e.statusText === "timeout") {
+                alert("服务器忙");
+            } else {
+                if (e && e.responseText) {
+                    alert(e.responseText);
+                } else {
+                    alert(e);
+                }
+            }
+        });
+        return false;
+    }
+
+    /*初始化*/
+    window.onload = function () {
+        queryOrders(1, 10);
+    };
+</script>
